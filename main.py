@@ -18,15 +18,14 @@ def create_graph():
     
     nodes = {
         'A': {'name': 'Rektorat UNRI', 'pos': (0, 0)},
-        'B': {'name': 'Bundaran SM Amin', 'pos': (1, 1)},
+        'B': {'name': 'Bundaran SM Amin', 'pos': (1, 0.5)},
         'C': {'name': 'The Premiere Hotel', 'pos': (3, 1)},
         'D': {'name': 'RS Awal Bros', 'pos': (3, 2)},
         'E': {'name': 'RS Prima Pekanbaru', 'pos': (4, 0.5)},
         'F': {'name': 'Hotel Aryaduta', 'pos': (5, 1)},
-        'G': {'name': 'Pekanbaru Eye Center', 'pos': (1, 0)},
-        
-        'I': {'name': 'Grand Central Hotel', 'pos': (8, 0)},
-        'J': {'name': 'RS PMC', 'pos': (9, 0)},
+        'G': {'name': 'Pekanbaru Eye Center', 'pos': (4, 0)},
+        'H': {'name': 'Grand Central Hotel', 'pos': (8, 0)},
+        'I': {'name': 'RS PMC', 'pos': (9, 0)},
     }
     
     for node_id, node_data in nodes.items():
@@ -36,18 +35,17 @@ def create_graph():
         ('A', 'B', 4.2),
         ('B', 'C', 6.6),
         ('C', 'D', 1.3),
-        ('C', 'I', 1.4),
-        ('I', 'J', 1.7),
-        ('F', 'J', 1.8),
+        ('C', 'H', 1.4),
+        ('H', 'I', 1.7),
+        ('F', 'I', 1.8),
         ('A', 'G', 6.6),
-        ('G', 'I', 6.1),
+        ('G', 'H', 6.1),
         ('G', 'B', 5.0),
         ('B', 'D', 7.3),
         ('A', 'B', 4.2),
         ('B', 'E', 1.2),
         ('B', 'E', 0.8),
-        ('E', 'I', 7.0),
-        ('I', 'J', 0.8),
+        ('E', 'H', 7.0),
         ('C', 'E', 6.1),
         ('D', 'F', 1.5),
         ('C', 'F', 0.9),
@@ -177,7 +175,6 @@ def main():
     st.sidebar.write(f"Jumlah Muka (F): {f}")
     st.sidebar.write(f"Rumus Euler: V - E + F = {v} - {e} + {f} = {v - e + f}")
     
-    # Tampilkan graf dasar hanya jika belum ada hasil pencarian yang ditampilkan
     if "find_path" not in st.session_state or not st.session_state.find_path:
         st.subheader("Visualisasi Graf Dasar")
         fig_base = visualize_graph(G, nodes)
