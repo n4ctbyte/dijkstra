@@ -19,13 +19,14 @@ def create_graph():
     nodes = {
         'A': {'name': 'Rektorat UNRI', 'pos': (0, 0)},
         'B': {'name': 'Bundaran SM Amin', 'pos': (1, 0.5)},
-        'C': {'name': 'The Premiere Hotel', 'pos': (3, 1)},
+        'C': {'name': 'The Premiere Hotel', 'pos': (4, 1)},
         'D': {'name': 'RS Awal Bros', 'pos': (3, 2)},
         'E': {'name': 'RS Prima Pekanbaru', 'pos': (4, 0.5)},
-        'F': {'name': 'Hotel Aryaduta', 'pos': (5, 1)},
+        'F': {'name': 'Hotel Aryaduta', 'pos': (6, 1)},
         'G': {'name': 'Pekanbaru Eye Center', 'pos': (4, 0)},
         'H': {'name': 'Grand Central Hotel', 'pos': (8, 0)},
         'I': {'name': 'RS PMC', 'pos': (9, 0)},
+        'J': {'name': 'Wrung Makan Uni Mega', 'pos': (2.5, 1)},
     }
     
     for node_id, node_data in nodes.items():
@@ -33,22 +34,22 @@ def create_graph():
     
     edges = [
         ('A', 'B', 4.2),
-        ('B', 'C', 6.6),
         ('C', 'D', 1.3),
         ('C', 'H', 1.4),
-        ('H', 'I', 1.7),
+        ('H', 'I', 1.8),
         ('F', 'I', 1.8),
         ('A', 'G', 6.6),
         ('G', 'H', 6.1),
         ('G', 'B', 5.0),
         ('B', 'D', 7.3),
         ('A', 'B', 4.2),
-        ('B', 'E', 1.2),
-        ('B', 'E', 0.8),
-        ('E', 'H', 7.0),
+        ('B', 'E', 0.85),
+        ('E', 'H', 7.5),
         ('C', 'E', 6.1),
         ('D', 'F', 1.5),
         ('C', 'F', 0.9),
+        ('B', 'J', 4.5),
+        ('J', 'C', 2.3),
     ]
     
     for u, v, w in edges:
