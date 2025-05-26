@@ -66,7 +66,7 @@ def calculate_euler_formula(G):
     F = 2 + E - V
     return V, E, F
 
-def visualize_graph(G, nodes, path=None):
+def visualize_graph(G, nodes, path=None, title_suffix=""):
     plt.figure(figsize=(14, 10))
     
     pos = nx.get_node_attributes(G, 'pos')
@@ -99,7 +99,7 @@ def visualize_graph(G, nodes, path=None):
     edge_labels = {k: f"{v} km" for k, v in edge_labels.items()}
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_size=8, font_color='#2c3e50')
     
-    plt.title("Graf Jalur UNRI Panam - RS PMC Pekanbaru", fontsize=16, fontweight='bold')
+    plt.title(f"Graf Jalur UNRI Panam - RS PMC Pekanbaru{title_suffix}", fontsize=16, fontweight='bold')
     plt.axis('off')
     plt.tight_layout()
     
@@ -113,6 +113,37 @@ def find_shortest_path(G, source, target):
     except nx.NetworkXNoPath:
         return None, float('inf')
 
+def find_alternative_path(G, source, target, excluded_edges):
+    """
+    Mencari jalur terpendek tanpa menggunakan sisi-sisi yang dikecualikan
+    """
+    # Buat salinan graf
+    G_temp = G.copy()
+    
+    # Hapus sisi-sisi yang dikecualikan
+    for u, v in excluded_edges:
+        if G_temp.has_edge(u, v):
+            G_temp.remove_edge(u, v)
+    
+    try:
+        path = nx.dijkstra_path(G_temp, source=source, target=target, weight='weight')
+        length = nx.dijkstra_path_length(G_temp, source=source, target=target, weight='weight')
+        return path, length
+    except nx.NetworkXNoPath:
+        return None, float('inf')
+
+def get_path_edges(path):
+    """
+    Mengambil daftar sisi dari sebuah jalur
+    """
+    edges = []
+    for i in range(len(path) - 1):
+        u, v = path[i], path[i + 1]
+        # Normalisasi urutan untuk graf tak berarah
+        edge = tuple(sorted([u, v]))
+        edges.append(edge)
+    return edges
+
 def main():
     G, nodes = create_graph()
     
@@ -124,39 +155,62 @@ def main():
                                     format_func=lambda x: f"{x}: {nodes[x]['name']}", index=8)
     
     calculate_return = st.sidebar.checkbox("Hitung jalur pulang juga")
+    avoid_same_path = st.sidebar.checkbox("Jalur pulang harus berbeda dari jalur pergi", value=True)
     
     if st.sidebar.button("Cari Lintasan Terpendek", key="find_path"):
         path_to_pmc, length_to_pmc = find_shortest_path(G, start_node, end_node)
         
         if calculate_return:
-            path_from_pmc, length_from_pmc = find_shortest_path(G, end_node, start_node)
-            total_length = length_to_pmc + length_from_pmc
+            if avoid_same_path and path_to_pmc:
+                # Dapatkan sisi-sisi yang digunakan dalam jalur pergi
+                used_edges = get_path_edges(path_to_pmc)
+                # Cari jalur pulang yang menghindari sisi-sisi tersebut
+                path_from_pmc, length_from_pmc = find_alternative_path(G, end_node, start_node, used_edges)
+            else:
+                path_from_pmc, length_from_pmc = find_shortest_path(G, end_node, start_node)
             
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                st.subheader("Jalur Pergi")
-                if path_to_pmc:
+            if path_to_pmc and path_from_pmc:
+                total_length = length_to_pmc + length_from_pmc
+                
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.subheader("Jalur Pergi")
                     st.markdown(f"**Jalur Pergi:** {' → '.join(path_to_pmc)}")
                     st.markdown(f"**Jarak:** {length_to_pmc:.2f} km")
                     
-                    fig_to = visualize_graph(G, nodes, path_to_pmc)
+                    fig_to = visualize_graph(G, nodes, path_to_pmc, " (Jalur Pergi)")
                     st.pyplot(fig_to)
-                else:
-                    st.error("Tidak ada jalur yang ditemukan!")
-            
-            with col2:
-                st.subheader("Jalur Pulang")
-                if path_from_pmc:
+                
+                with col2:
+                    st.subheader("Jalur Pulang")
                     st.markdown(f"**Jalur Pulang:** {' → '.join(path_from_pmc)}")
                     st.markdown(f"**Jarak:** {length_from_pmc:.2f} km")
                     
-                    fig_from = visualize_graph(G, nodes, path_from_pmc)
+                    fig_from = visualize_graph(G, nodes, path_from_pmc, " (Jalur Pulang)")
                     st.pyplot(fig_from)
-                else:
-                    st.error("Tidak ada jalur yang ditemukan!")
-            
-            st.success(f"Total jarak (pergi-pulang): {total_length:.2f} km")
+                
+                st.success(f"Total jarak (pergi-pulang): {total_length:.2f} km")
+                
+                # Tampilkan informasi tambahan
+                if avoid_same_path:
+                    pergi_edges = get_path_edges(path_to_pmc)
+                    pulang_edges = get_path_edges(path_from_pmc)
+                    common_edges = set(pergi_edges) & set(pulang_edges)
+                    
+                    if common_edges:
+                        st.warning(f"Masih ada {len(common_edges)} sisi yang sama: {common_edges}")
+                    else:
+                        st.info("✅ Jalur pulang berhasil menghindari semua sisi dari jalur pergi!")
+                
+            else:
+                if not path_to_pmc:
+                    st.error("Tidak ada jalur pergi yang ditemukan!")
+                if not path_from_pmc:
+                    if avoid_same_path:
+                        st.error("Tidak ada jalur pulang alternatif yang ditemukan! Coba matikan opsi 'Jalur pulang harus berbeda'.")
+                    else:
+                        st.error("Tidak ada jalur pulang yang ditemukan!")
             
         else:
             if path_to_pmc:
@@ -188,6 +242,10 @@ def main():
         - **Simpul (Vertex)**: Merepresentasikan lokasi penting seperti perempatan, pertigaan, atau landmark.
         - **Sisi (Edge)**: Merepresentasikan jalan yang menghubungkan dua lokasi.
         - **Bobot (Weight)**: Merepresentasikan jarak dalam kilometer.
+        
+        **Fitur Jalur Pulang Berbeda:**
+        - Ketika opsi "Jalur pulang harus berbeda" diaktifkan, sistem akan mencari jalur pulang yang tidak menggunakan sisi/jalan yang sama dengan jalur pergi.
+        - Ini berguna untuk simulasi kondisi nyata dimana mungkin ada jalan yang macet atau ingin mencoba rute alternatif.
         
         Graf ini adalah contoh graf bidang (planar graph) yang memenuhi rumus Euler:
         
