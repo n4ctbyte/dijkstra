@@ -207,8 +207,8 @@ def find_alternative_path(G, used_path, start, end):
 
 def get_euler_routes():
     routes = {
-        'Route 2 (Manual)': ['A', 'B', 'E', 'C', 'D', 'F', 'I', 'H', 'G', 'A'],
-        'Route 3 (Manual)': ['A', 'G', 'H', 'I', 'F', 'C', 'E', 'B', 'A']
+        'Route 2': ['A', 'B', 'E', 'C', 'D', 'F', 'I', 'H', 'G', 'A'],
+        'Route 3': ['A', 'G', 'H', 'I', 'F', 'C', 'E', 'B', 'A']
     }
     return routes
 
@@ -311,7 +311,7 @@ def visualize_all_graphs(G, nodes, bellman_route):
     
     ax = axes[0, 1]
     route = bellman_route['path']
-    ax.set_title("Route 1 (Bellman-Ford)", fontsize=14, fontweight='bold')
+    ax.set_title("Route 1", fontsize=14, fontweight='bold')
     
     nx.draw_networkx_nodes(G, pos, node_size=600, node_color='#95a5a6', alpha=0.5, ax=ax)
     nx.draw_networkx_edges(G, pos, width=1.0, alpha=0.3, edge_color='#bdc3c7', ax=ax)
@@ -373,7 +373,7 @@ def main():
             st.subheader("Ringkasan 3 Lintasan Euler Kecil (A ke I dan kembali ke A)")
             
             route_display = ' → '.join(bellman_route['path'])
-            st.write(f"**Route 1 (Bellman-Ford):** {route_display}")
+            st.write(f"**Route 1:** {route_display}")
             st.write(f"**Jarak:** {bellman_route['total_distance']:.2f} km | **Langkah:** {len(bellman_route['path'])-1}")
             st.write("---")
             
@@ -387,7 +387,7 @@ def main():
     elif view_option == "Route Individual":
         all_routes = {}
         if bellman_route:
-            all_routes['Route 1 (Bellman-Ford)'] = bellman_route['path']
+            all_routes['Route 1 '] = bellman_route['path']
         all_routes.update(manual_routes)
         
         selected_route = st.sidebar.selectbox("Pilih Route:", list(all_routes.keys()))
@@ -575,7 +575,7 @@ def main():
         
         all_routes = {}
         if bellman_route:
-            all_routes['Route 1 (Bellman-Ford)'] = bellman_route['path']
+            all_routes['Route 1'] = bellman_route['path']
         all_routes.update(manual_routes)
         
         for route_name, route in all_routes.items():
